@@ -4,7 +4,7 @@
 # License: MIT license
 # ============================================================================
 
-from abc import abstractmethod
+from abc import abstractmethod  # TODO: what?
 import denite.util
 
 

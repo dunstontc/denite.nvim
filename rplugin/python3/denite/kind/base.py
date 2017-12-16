@@ -10,6 +10,20 @@ import denite.util
 class Base(object):
 
     def __init__(self, vim):
+        """
+
+        Attributes
+        ----------
+        name : string
+            The name of a kind.
+        default_action : string
+            Default action name.
+        persist_actions : list
+            List of action names which not close Denite buffer after executed.
+        redraw_actions : list
+            List of action names which redraw Denite buffer after executed.
+
+        """
         self.vim = vim
         self.name = 'base'
         self.default_action = 'echo'

@@ -61,7 +61,8 @@ def regex_convert_py_vim(expr):
 
 
 def escape_fuzzy(string, camelcase):
-    # Escape string for python regexp.
+    """Escape string for python regexp."""
+
     p = re.sub(r'([a-zA-Z0-9_-])(?!$)', r'\1[^\1]*', string)
     if camelcase and re.search(r'[A-Z](?!$)', string):
         p = re.sub(r'([a-z])(?!$)',
@@ -150,8 +151,9 @@ def parse_command(array, **kwargs):
     return [parse_arg(i) for i in array]
 
 
-# XXX: It override the builtin 'input()' function.
 def input(vim, context, prompt='', text='', completion=''):
+    """Overrides Vim's built in *input()* function."""
+
     try:
         if completion != '':
             return vim.call('input', prompt, text, completion)
@@ -173,7 +175,9 @@ def find_rplugins(context, source, loaded_paths):
     """Search for *.py
 
     Searches $VIMRUNTIME/*/rplugin/python3/denite/$source/
+
     """
+    # TODO: jackpot
 
     src = join('rplugin/python3/denite', source, '*.py')
     for runtime in context.get('runtimepath', '').split(','):

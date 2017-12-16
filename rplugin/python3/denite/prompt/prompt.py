@@ -30,6 +30,7 @@ class Prompt:
     """Prompt class.
 
     Attributes:
+    -----------
         prefix: Prompt prefix
         highlight_prefix: Highlight group name for the prefix
         highlight_text: Highlight group name for the text
@@ -51,6 +52,7 @@ class Prompt:
         """Constructor.
 
         Args:
+        ----
             nvim (neovim.Nvim): A ``neovim.Nvim`` instance.
         """
         from .caret import Caret

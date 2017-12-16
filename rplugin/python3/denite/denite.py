@@ -198,7 +198,9 @@ class Denite(object):
         return self._current_sources
 
     def load_sources(self, context):
-        # Load sources from runtimepath
+        """Load sources from runtimepath.
+
+        """
         loaded_paths = [x.path for x in self._sources.values()]
         for path, name in find_rplugins(context, 'source', loaded_paths):
             module = importlib.machinery.SourceFileLoader(
@@ -219,7 +221,9 @@ class Denite(object):
                     self._sources[alias].syntax_name = syntax_name
 
     def load_filters(self, context):
-        # Load filters from runtimepath
+        """Load filters from runtimepath.
+
+        """
         loaded_paths = [x.path for x in self._filters.values()]
         for path, name in find_rplugins(context, 'filter', loaded_paths):
             module = importlib.machinery.SourceFileLoader(
@@ -236,7 +240,9 @@ class Denite(object):
                     self._filters[alias].path = path
 
     def load_kinds(self, context):
-        # Load kinds from runtimepath
+        """Load kinds from runtimepath.
+
+        """
         loaded_paths = [x.path for x in self._kinds.values()]
         for path, name in find_rplugins(context, 'kind', loaded_paths):
             module = importlib.machinery.SourceFileLoader(

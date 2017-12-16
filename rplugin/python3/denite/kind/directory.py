@@ -17,6 +17,14 @@ class Kind(Base):
         self.default_action = 'narrow'
 
     def action_cd(self, context):
+        """Change lcd.
+
+        Parameters
+        ----------
+        context : object
+            Used to reference context[targets].
+
+        """
         target = context['targets'][0]
         self.vim.command('lcd {}'.format(target['action__path']))
 

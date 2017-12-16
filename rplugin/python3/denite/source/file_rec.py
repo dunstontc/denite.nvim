@@ -27,8 +27,10 @@ class Source(Base):
         self.__cache = {}
 
     def on_init(self, context):
-        """scantree.py command has special meaning, using the internal
-        scantree.py Implementation"""
+        """scantree.py command has special meaning,
+            using the internal scantree.py Implementation
+
+        """
 
         if self.vars['command']:
             if self.vars['command'][0] == 'scantree.py':
