@@ -13,6 +13,18 @@ from os.path import normpath, join, dirname
 
 
 def set_default(vim, var, val):
+    """Assign a value for a Vim variable.
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    var : string
+        The variable to set.
+    val : string
+        The value to assign.
+
+    """
     return vim.call('denite#util#set_default', var, val)
 
 
@@ -28,10 +40,35 @@ def globruntime(runtimepath, path):
 
 
 def echo(vim, color, string):
+    """Echo highlighted text to Vim's commandline & then reset the highlight.
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    color : string
+        The highlighting group to match. (ie. `Normal`, `ErrorMsg`, `PreProc`)
+    string : string
+        The text to be echoed.
+
+    """
     vim.call('denite#util#echo', color, string)
 
 
 def debug(vim, expr):
+    """debug.
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    expr :
+
+    See Also
+    --------
+        ``:help nvim_out_write``
+
+    """
     if hasattr(vim, 'out_write'):
         string = (expr if isinstance(expr, str) else str(expr))
         return vim.out_write('[denite] ' + string + '\n')
@@ -40,11 +77,22 @@ def debug(vim, expr):
 
 
 def error(vim, expr):
+    """Print an error message in Vim (added to ``:messages`` log).
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    expr :
+        Message to be output.
+
+    """
     string = (expr if isinstance(expr, str) else str(expr))
     vim.call('denite#util#print_error', string)
 
 
 def clear_cmdline(vim):
+    """Clear Vim's commandline."""
     vim.command('redraw | echo')
 
 
@@ -61,8 +109,15 @@ def regex_convert_py_vim(expr):
 
 
 def escape_fuzzy(string, camelcase):
-    """Escape string for python regexp."""
+    """Escape string for python regexp.
 
+    Parameters
+    ----------
+    string : string
+        String to escape
+    camelcase : bool
+
+    """
     p = re.sub(r'([a-zA-Z0-9_-])(?!$)', r'\1[^\1]*', string)
     if camelcase and re.search(r'[A-Z](?!$)', string):
         p = re.sub(r'([a-z])(?!$)',
@@ -98,6 +153,23 @@ def path2dir(path):
 
 
 def path2project(vim, path, root_markers):
+    """Search for project root marker files.
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    path : string
+        Path to search for the root of.
+    root_markers :
+        Files that indicate a project's root.
+
+    Returns
+    -------
+    path: string
+        Path to the project's root directory.
+
+    """
     return vim.call('denite#util#path2project_directory', path, root_markers)
 
 
@@ -127,6 +199,16 @@ def expand(path):
 
 
 def abspath(vim, path):
+    """Return the absolute path of a file.
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    path : string
+        The path to convert
+
+    """
     return normpath(join(vim.call('getcwd'), expand(path)))
 
 
@@ -152,7 +234,25 @@ def parse_command(array, **kwargs):
 
 
 def input(vim, context, prompt='', text='', completion=''):
-    """Overrides Vim's built in *input()* function."""
+    """Overrides Vim's built in *input()* function..
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``.
+    context : object
+    prompt : string, optional
+        The text to prompt with.
+    text : string, optional
+        Defualt input text.
+    completion :
+
+    Notes
+    -----
+    Neovim raises `nvim.error` instead of `KeyboardInterrupt` when `Ctrl-C`
+    has pressed so we treat it as a real `KeyboardInterrupt` exception.
+
+    """
 
     try:
         if completion != '':
@@ -160,9 +260,6 @@ def input(vim, context, prompt='', text='', completion=''):
         else:
             return vim.call('input', prompt, text)
     except vim.error as e:
-        # NOTE:
-        # neovim raise nvim.error instead of KeyboardInterrupt when Ctrl-C
-        # has pressed so treat it as a real KeyboardInterrupt exception.
         if str(e) != "b'Keyboard interrupt'":
             raise e
     except KeyboardInterrupt:
@@ -172,12 +269,11 @@ def input(vim, context, prompt='', text='', completion=''):
 
 
 def find_rplugins(context, source, loaded_paths):
-    """Search for *.py
+    """Search for *.py.
 
     Searches $VIMRUNTIME/*/rplugin/python3/denite/$source/
 
     """
-    # TODO: jackpot
 
     src = join('rplugin/python3/denite', source, '*.py')
     for runtime in context.get('runtimepath', '').split(','):

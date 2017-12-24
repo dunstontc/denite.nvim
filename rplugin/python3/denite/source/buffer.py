@@ -80,15 +80,22 @@ class Source(Base):
         return {
             'bufnr': buffer_attr['number'],
             'word': name,
-            'abbr': '{0}{1} {2}{3} {4}'.format(
+            'abbr': '{0}{1} {2}{3} {4} {5}'.format(
+                # 0) Padded Buffer Number
                 str(buffer_attr['number']).rjust(rjust, ' '),
+                # 1) Buffer Status
                 buffer_attr['status'],
+                # 2) Buffer Name
                 name,
+                # 3) Filetype
                 ' [{}]'.format(buffer_attr['filetype']
                                ) if buffer_attr['filetype'] != '' else '',
+                # 4) Timestamp?
                 strftime('(' + self.vars['date_format'] + ')',
                          localtime(buffer_attr['timestamp'])
-                         ) if self.vars['date_format'] != '' else ''
+                         ) if self.vars['date_format'] != '' else '',
+                # 5) Full Path
+                path,
             ),
             'action__bufnr': buffer_attr['number'],
             'action__path': path,

@@ -13,6 +13,10 @@ from denite.util import clearmatch
 
 
 class Kind(Openable):
+    """An interface to jump to the file position.
+
+    It extends |denite-kind-openable|.
+    """
 
     def __init__(self, vim):
         super().__init__(vim)
@@ -24,6 +28,7 @@ class Kind(Openable):
         self._previewed_buffers = {}
 
     def action_open(self, context):
+        """Open the file; this is the default action."""
         cwd = self.vim.call('getcwd')
         for target in context['targets']:
             path = target['action__path']
@@ -49,6 +54,7 @@ class Kind(Openable):
                 self._previewed_buffers.pop(path)
 
     def action_preview(self, context):
+        """Preview and highlight the file. Close the preview window if it is already exists."""
         target = context['targets'][0]
 
         if (not context['auto_preview'] and
@@ -76,6 +82,7 @@ class Kind(Openable):
         self.__cleanup()
 
     def action_highlight(self, context):
+        """Highlight the location of the candidate if the buffer is visible."""
         target = context['targets'][0]
         bufnr = self.vim.call('bufnr', target['action__path'])
 
@@ -90,6 +97,7 @@ class Kind(Openable):
         self.vim.call('win_gotoid', prev_id)
 
     def action_quickfix(self, context):
+        """Set the quickfix list and open the quickfix window."""
         qflist = [{
             'filename': x['action__path'],
             'lnum': x['action__line'],

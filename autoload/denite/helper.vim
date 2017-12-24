@@ -4,11 +4,14 @@
 " License: MIT license
 "=============================================================================
 
+""
+" @function(denite#helper#complete) {arglead} {cmdline} \[cursorpos]
+"
 function! denite#helper#complete(arglead, cmdline, cursorpos) abort
   let _ = []
 
   if a:arglead =~# ':'
-    " Todo: source arguments completion.
+    " TODO: source arguments completion.
   elseif a:arglead =~# '^-'
     " Option names completion.
     let bool_options = keys(filter(copy(denite#init#_user_options()),
@@ -30,6 +33,7 @@ function! denite#helper#complete(arglead, cmdline, cursorpos) abort
 
   return uniq(sort(filter(_, 'stridx(v:val, a:arglead) == 0')))
 endfunction
+
 function! denite#helper#complete_actions(arglead, cmdline, cursorpos) abort
   return uniq(sort(filter(copy(g:denite#_actions),
         \ 'stridx(v:val, a:arglead) == 0')))
@@ -54,6 +58,7 @@ function! denite#helper#call_denite(command, args, line1, line2) abort
   call denite#start(args, context)
 endfunction
 
+
 function! denite#helper#preview_file(context, filename) abort
   if a:context.vertical_preview
     let denite_winwidth = &columns
@@ -75,6 +80,10 @@ function! denite#helper#options() abort
   return map(keys(denite#init#_user_options()), "tr(v:val, '_', '-')")
 endfunction
 
+""
+" @private
+" @function(denite#helper#_parse_options_args) {cmdline}
+"
 function! denite#helper#_parse_options_args(cmdline) abort
   let _ = []
   let [args, options] = s:parse_options(a:cmdline)
