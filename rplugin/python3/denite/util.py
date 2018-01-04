@@ -29,10 +29,21 @@ def set_default(vim, var, val):
 
 
 def convert2list(expr):
+    """Convert an expression to a list."""
     return (expr if isinstance(expr, list) else [expr])
 
 
 def globruntime(runtimepath, path):
+    """Return the locations in Vim's runtimepath.
+
+    Parameters
+    ----------
+    runtimepath : string
+        ``self.vim.eval('&rtp')``
+    path : string
+        idk
+
+    """
     ret = []
     for rtp in re.split(',', runtimepath):
         ret += glob.glob(rtp + '/' + path)
@@ -63,6 +74,7 @@ def debug(vim, expr):
     vim : object
         Vim instance ``self.vim``.
     expr :
+        An expression or string to print.
 
     See Also
     --------
@@ -115,7 +127,7 @@ def escape_fuzzy(string, camelcase):
     ----------
     string : string
         String to escape
-    camelcase : bool
+    camelcase : bool?
 
     """
     p = re.sub(r'([a-zA-Z0-9_-])(?!$)', r'\1[^\1]*', string)
@@ -161,7 +173,7 @@ def path2project(vim, path, root_markers):
         Vim instance ``self.vim``.
     path : string
         Path to search for the root of.
-    root_markers :
+    root_markers : list, string(s)
         Files that indicate a project's root.
 
     Returns
@@ -174,6 +186,21 @@ def path2project(vim, path, root_markers):
 
 
 def parse_jump_line(path_head, line):
+    """Return *action__* variables for async results.
+
+    Parameters
+    ----------
+    path_head : string
+        Path to the file to parse.
+    line : string
+        Line to parse.
+
+    Returns
+    -------
+    list
+        [path, linenr, col, text]
+
+    """
     m = re.search(r'^((?:[a-zA-Z]:)?[^:]*):(\d+)(?::(\d+))?:(.*)$', line)
     if not m or not m.group(1) or not m.group(4):
         return []
@@ -195,6 +222,14 @@ def parse_jump_line(path_head, line):
 
 
 def expand(path):
+    """Expand path with ``os.path``.
+
+    Parameters
+    ----------
+    path : string
+        The path to convert
+
+    """
     return os.path.expandvars(os.path.expanduser(path))
 
 
@@ -213,6 +248,16 @@ def abspath(vim, path):
 
 
 def relpath(vim, path):
+    """relpath.
+
+    Parameters
+    ----------
+    vim : object
+        Vim instance ``self.vim``
+    path : string
+        The path to convert
+
+    """
     return normpath(vim.call('fnamemodify', expand(path), ':~:.'))
 
 
@@ -234,16 +279,15 @@ def parse_command(array, **kwargs):
 
 
 def input(vim, context, prompt='', text='', completion=''):
-    """Overrides Vim's built in *input()* function..
+    """Use in place of Vim's built in *input* function..
 
     Parameters
     ----------
-    vim : object
-        Vim instance ``self.vim``.
+    vim     : object
     context : object
-    prompt : string, optional
+    prompt  : string, optional
         The text to prompt with.
-    text : string, optional
+    text    : string, optional
         Defualt input text.
     completion :
 
@@ -253,7 +297,6 @@ def input(vim, context, prompt='', text='', completion=''):
     has pressed so we treat it as a real `KeyboardInterrupt` exception.
 
     """
-
     try:
         if completion != '':
             return vim.call('input', prompt, text, completion)

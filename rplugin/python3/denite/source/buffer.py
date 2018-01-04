@@ -1,3 +1,4 @@
+"""Denite source for Vim buffers."""
 # ============================================================================
 # FILE: buffer.py
 # AUTHOR: Yasumasa Tamura (tamura.yasumasa@gmail.com)
@@ -5,6 +6,7 @@
 # ============================================================================
 
 from .base import Base
+
 from os.path import getatime, exists
 from time import localtime, strftime, time
 from sys import maxsize

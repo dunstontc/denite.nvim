@@ -5,8 +5,8 @@
 "=============================================================================
 
 ""
-" @function(denite#helper#complete) {arglead} {cmdline} \[cursorpos]
-"
+" @public
+" @function(denite#helper#complete) {arglead} {cmdline} {cursorpos}
 function! denite#helper#complete(arglead, cmdline, cursorpos) abort
   let _ = []
 
@@ -34,11 +34,17 @@ function! denite#helper#complete(arglead, cmdline, cursorpos) abort
   return uniq(sort(filter(_, 'stridx(v:val, a:arglead) == 0')))
 endfunction
 
+""
+" @public
 function! denite#helper#complete_actions(arglead, cmdline, cursorpos) abort
   return uniq(sort(filter(copy(g:denite#_actions),
         \ 'stridx(v:val, a:arglead) == 0')))
 endfunction
 
+""
+" @public
+" Parse cmdline calls to Denite.
+" (|DeniteCursorWord|,|DeniteBufferDir|,|DeniteProjectDir|)
 function! denite#helper#call_denite(command, args, line1, line2) abort
   let [args, context] = denite#helper#_parse_options_args(a:args)
 
@@ -58,7 +64,8 @@ function! denite#helper#call_denite(command, args, line1, line2) abort
   call denite#start(args, context)
 endfunction
 
-
+""
+" @public
 function! denite#helper#preview_file(context, filename) abort
   if a:context.vertical_preview
     let denite_winwidth = &columns
@@ -76,14 +83,16 @@ function! denite#helper#preview_file(context, filename) abort
   endif
 endfunction
 
+""
+" @public
+" Convert *denite_options* to *denite-options*
 function! denite#helper#options() abort
   return map(keys(denite#init#_user_options()), "tr(v:val, '_', '-')")
 endfunction
 
 ""
-" @private
+" @public
 " @function(denite#helper#_parse_options_args) {cmdline}
-"
 function! denite#helper#_parse_options_args(cmdline) abort
   let _ = []
   let [args, options] = s:parse_options(a:cmdline)
@@ -113,6 +122,11 @@ function! denite#helper#_parse_options_args(cmdline) abort
 
   return [_, options]
 endfunction
+""
+" @private
+" @usage
+" Don't match {match} if it is located in-between unescaped single or double
+" quotes.
 function! s:re_unquoted_match(match) abort
   " Don't match a:match if it is located in-between unescaped single or double
   " quotes
@@ -120,6 +134,8 @@ function! s:re_unquoted_match(match) abort
         \ . "'" . '([^' . "'" . '\\]*\\.)*[^' . "'" . '\\]*' . "'" . '))*[^"'
         \ . "'" . ']*$'
 endfunction
+""
+" @private
 function! s:parse_options(cmdline) abort
   let args = []
   let options = {}
@@ -150,6 +166,8 @@ function! s:parse_options(cmdline) abort
 
   return [args, options]
 endfunction
+""
+" @private
 function! s:eval_cmdline(cmdline) abort
   let cmdline = ''
   let prev_match = 0
@@ -171,6 +189,8 @@ function! s:eval_cmdline(cmdline) abort
   return cmdline
 endfunction
 
+""
+" @public
 function! denite#helper#has_cmdline() abort
   if !exists('*getcompletion')
     return 0
@@ -185,10 +205,14 @@ function! denite#helper#has_cmdline() abort
   return 1
 endfunction
 
-
+""
+" @public
 function! denite#helper#_set_oldfiles(oldfiles) abort
   let v:oldfiles = a:oldfiles
 endfunction
+
+""
+" @public
 function! denite#helper#_get_oldfiles() abort
   return filter(copy(v:oldfiles), 'filereadable(v:val) || buflisted(v:val)')
 endfunction

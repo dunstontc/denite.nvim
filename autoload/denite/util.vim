@@ -6,6 +6,8 @@
 
 let s:is_windows = has('win32') || has('win64')
 
+""
+" @public
 function! denite#util#set_default(var, val, ...)  abort
   if !exists(a:var) || type({a:var}) != type(a:val)
     let alternate_var = get(a:000, 0, '')
@@ -14,17 +16,32 @@ function! denite#util#set_default(var, val, ...)  abort
           \ {alternate_var} : a:val
   endif
 endfunction
+
+""
+" @public
+" Function for piping error messages.
 function! denite#util#print_error(string) abort
   echohl Error | echomsg '[denite] ' . a:string | echohl None
 endfunction
+
+""
+" @public
+" Function for piping error messages.
 function! denite#util#print_warning(string) abort
   echohl WarningMsg | echomsg '[denite] ' . a:string | echohl None
 endfunction
 
+""
+" @public
+" Convert arg {expr}ession to list.
 function! denite#util#convert2list(expr) abort
   return type(a:expr) ==# type([]) ? a:expr : [a:expr]
 endfunction
 
+""
+" @public
+" Execute a Vim {command} on a given {path}.
+" Prompt to make directory if necessary.
 function! denite#util#execute_path(command, path) abort
   let dir = s:path2directory(a:path)
   " Auto make directory.
@@ -49,6 +66,10 @@ function! denite#util#execute_path(command, path) abort
     let &wildignore = save_wildignore
   endtry
 endfunction
+
+""
+" @public
+" Execute a given Vim {command}; prints message on error with |denite#util#print_error|.
 function! denite#util#execute_command(command) abort
   try
     execute a:command
@@ -57,12 +78,19 @@ function! denite#util#execute_command(command) abort
   endtry
 endfunction
 
+""
+" @public
+" Echo {string} to the cmdline with {color}.
 function! denite#util#echo(color, string) abort
   execute 'echohl' a:color
   echon a:string
   echohl NONE
 endfunction
 
+""
+" @public
+" Detect desktop environment & Open file at a given path.
+" Note: *#* and *%* required to be escaped (:help |cmdline-special|)
 function! denite#util#open(filename) abort
   let filename = fnamemodify(a:filename, ':p')
 
@@ -114,10 +142,16 @@ function! denite#util#open(filename) abort
   endif
 endfunction
 
+""
+" @public
+" Split a string by spaces.
 function! denite#util#split(string) abort
   return split(a:string, '\s*,\s*')
 endfunction
 
+""
+" @public
+" Search up a {path} for files or folders ({root_markers}) marking a project's root.
 function! denite#util#path2project_directory(path, root_markers) abort
   let search_directory = s:path2directory(a:path)
   let directory = ''
@@ -172,16 +206,24 @@ function! denite#util#path2project_directory(path, root_markers) abort
 
   return s:substitute_path_separator(directory)
 endfunction
+""
+" @private
 function! s:path2directory(path) abort
   return s:substitute_path_separator(
         \ isdirectory(a:path) ? a:path : fnamemodify(a:path, ':p:h'))
 endfunction
+""
+" @private
 function! s:substitute_path_separator(path) abort
   return s:is_windows ? substitute(a:path, '\\', '/', 'g') : a:path
 endfunction
+""
+" @private
 function! s:escape_file_searching(buffer_name) abort
   return escape(a:buffer_name, '*[]?{}, ')
 endfunction
+""
+" @private
 function! s:_path2project_directory_git(path) abort
   let parent = a:path
 
@@ -197,6 +239,8 @@ function! s:_path2project_directory_git(path) abort
     let parent = next
   endwhile
 endfunction
+""
+" @private
 function! s:_path2project_directory_svn(path) abort
   let search_directory = a:path
   let directory = ''
@@ -221,6 +265,8 @@ function! s:_path2project_directory_svn(path) abort
   endif
   return directory
 endfunction
+""
+" @private
 function! s:_path2project_directory_others(vcs, path) abort
   let vcs = a:vcs
   let search_directory = a:path
@@ -232,6 +278,8 @@ function! s:_path2project_directory_others(vcs, path) abort
   endif
   return fnamemodify(d, ':p:h:h')
 endfunction
+""
+" @private
 function! s:expand(path) abort "{{{
   return s:substitute_path_separator(
         \ (a:path =~# '^\~') ? fnamemodify(a:path, ':p') :
@@ -240,6 +288,9 @@ function! s:expand(path) abort "{{{
         \ a:path)
 endfunction"}}}
 
+""
+" @public
+" Determine alternate buffer? TODO(dunstontc): properly define
 function! denite#util#alternate_buffer() abort
   if len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) <= 1
     enew
@@ -267,6 +318,9 @@ function! denite#util#alternate_buffer() abort
     bnext
   endif
 endfunction
+
+""
+" @public
 function! denite#util#delete_buffer(command, bufnr) abort
   if index(tabpagebuflist(), a:bufnr) < 0
     silent execute a:bufnr a:command
@@ -291,6 +345,9 @@ function! denite#util#delete_buffer(command, bufnr) abort
   silent execute a:bufnr a:command
 endfunction
 
+""
+" @public
+" Prompt for yes/no with a {message}.
 function! denite#util#input_yesno(message) abort
   let yesno = input(a:message . ' [yes/no]: ')
   while yesno !~? '^\%(y\%[es]\|n\%[o]\)$'

@@ -8,10 +8,14 @@ if !exists('s:is_enabled')
   let s:is_enabled = 0
 endif
 
+""
+" @private
 function! s:is_initialized() abort
   return exists('g:denite#_channel_id')
 endfunction
 
+""
+" Initialize Denite and check to see if it's running in a compatible environment.
 function! denite#init#_initialize() abort
   if s:is_initialized()
     return
@@ -55,6 +59,8 @@ function! denite#init#_initialize() abort
   endtry
 endfunction
 
+""
+" Define default context variables.
 function! denite#init#_context() abort
   return {
         \ 'encoding': &encoding,
@@ -74,6 +80,9 @@ function! denite#init#_context() abort
         \ 'selected_icon': '*',
         \}
 endfunction
+
+""
+" Define default user options.
 function! denite#init#_user_options() abort
   return {
         \ 'auto_accel': v:false,
@@ -127,6 +136,8 @@ function! denite#init#_user_options() abort
         \ 'winminheight': -1,
         \}
 endfunction
+""
+" Define deprecated options.
 function! denite#init#_deprecated_options() abort
   return {
         \ 'select': 'cursor_pos',

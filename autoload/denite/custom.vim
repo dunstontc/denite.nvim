@@ -120,6 +120,8 @@ function! denite#custom#call_action(kind, name, context) abort
   endfor
 endfunction
 
+""
+" @private
 function! s:set_custom(dest, name_or_dict, value) abort
   if type(a:name_or_dict) == type({})
     call extend(a:dest, a:name_or_dict)

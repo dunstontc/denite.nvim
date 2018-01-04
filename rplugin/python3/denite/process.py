@@ -4,11 +4,11 @@
 # License: MIT license
 # ============================================================================
 
+import os
 import subprocess
 from threading import Thread
 from queue import Queue
 from time import time, sleep
-import os
 
 
 class Process(object):
