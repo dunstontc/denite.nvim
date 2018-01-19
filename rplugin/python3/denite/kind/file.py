@@ -102,8 +102,9 @@ class Kind(Openable):
             'filename': x['action__path'],
             'lnum': x['action__line'],
             'text': x['action__text'],
-        } for x in context['targets']
+            } for x in context['targets']
                   if 'action__line' in x and 'action__text' in x]
+
         self.vim.call('setqflist', qflist)
         self.vim.command('copen')
 
