@@ -7,7 +7,6 @@
 function! denite#initialize() abort
   return denite#init#_initialize()
 endfunction
-
 function! denite#start(sources, ...) abort
   call inputsave()
   try
@@ -36,12 +35,6 @@ function! denite#get_status_linenr() abort
   return denite#get_status('linenr')
 endfunction
 
-<<<<<<< HEAD
-
-""
-" @private
-=======
->>>>>>> 5bb925df42e7e6bd9554a44a3cfefdfe44ba958c
 function! s:start(sources, user_context) abort
   let buffer_name = get(a:user_context, 'buffer_name', 'default')
 
@@ -79,8 +72,6 @@ function! s:start(sources, user_context) abort
         \            : denite#vim#_start(a:sources, context)
 endfunction
 
-""
-" @public
 function! denite#do_action(context, action_name, targets) abort
   return has('nvim') ?
         \ _denite_do_action(a:context, a:action_name, a:targets) :
