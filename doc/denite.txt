@@ -959,21 +959,27 @@ denite#do_action({context}, {action-name}, {targets})
 		Runs an action {action-name} against {targets}.  This will
 		mainly be used in |denite#custom#action()|.
 
-denite#get_status_mode()			 *denite#get_status_mode()*
-		Returns the mode part of the status string.  It is useful to
+denite#get_status({name})				*denite#get_status()*
+		Returns the {name} part of the status string.  It is useful to
 		customize the statusline.
+
+		The available status names:
+		"mode": Current mode
+		"sources": Current sources and candidates number
+		"path": Specified |denite-options-path|
+		"linenr": Current line number
+
+denite#get_status_mode()			 *denite#get_status_mode()*
+		Please use |denite#get_status()| instead.
 
 denite#get_status_sources()			 *denite#get_status_sources()*
-		Returns the sources part of the status string.  It is useful to
-		customize the statusline.
+		Please use |denite#get_status()| instead.
 
 denite#get_status_path()			 *denite#get_status_path()*
-		Returns the path part of the status string.  It is useful to
-		customize the statusline.
+		Please use |denite#get_status()| instead.
 
 denite#get_status_linenr()			 *denite#get_status_linenr()*
-		Returns the line number part of the status string.  It is
-		useful to customize the statusline.
+		Please use |denite#get_status()| instead.
 
 							*denite#initialize()*
 denite#initialize()
@@ -1425,10 +1431,6 @@ file_rec	Gather files recursive and nominates all file names under the
 				Note: The patterns are based on fnmatch python
 				module.
 
-		min_cache_files	the minimum number of files that
-				it saves the caches.
-				(default is 10000)
-
 						*denite-source-filetype*
 filetype	Gather filetypes and change the filetype of the current
 		buffer.
@@ -1485,7 +1487,14 @@ line		Gather current buffer lines as candidates.
 		"args":      Search from the argument buffers
 		Note: If the direction is "all" or omitted, it searches from
 		the buffer top.
+		Note: If you use "buffers", 'hidden' option must be set to
+		gather the all buffers.  If 'hidden' is not set, not shown
+		buffers lines will be empty.
 
+		2. the line emptiness:
+		"empty":     Include empty lines
+		"noempty":   Do not include empty lines
+		Note: By default, empty lines are included.
 						*denite-source-menu*
 menu		Gather custom menus.
 
@@ -1795,9 +1804,9 @@ syntax_name		(String)		(Optional)
 				*denite-source-attribute-max_candidates*
 max_candidates		(Number)		(Optional)
 		If the candidates are more than it, denite will ignore the
-		filtering in asynchronous mode.
+		filtering.
 
-		If you omit it, 10000 is used.
+		If you omit it, 1000 is used.
 
 					*denite-source-attribute-matchers*
 matchers	(List)				(Optional)
@@ -1844,6 +1853,11 @@ highlight
 		(Function)			(Optional)
 		Apply the source specific syntax highlight.
 
+				*denite-source-attribute-is_public_context*
+is_public_context
+		(Bool)			(Optional)
+		If it is True, the source context can be accessed by action.
+
 					*denite-source-attribute-on_init*
 on_init		(Function)			(Optional)
 		It is called after the source is initialized.
@@ -1853,6 +1867,13 @@ on_init		(Function)			(Optional)
 on_close	(Function)			(Optional)
 		It is called before quit.
 		It takes {self} and {context} as its parameter.
+
+					*denite-source-attribute-get_status*
+get_status	(Function)			(Optional)
+		It is called to get the status for the |statusline|.
+		It takes {self} and {context} as its parameter.
+
+		If you omit it, |denite-source-attribute-name| is used.
 
 						*denite-source-attribute-__*
 __{name}	(Unknown)			(Optional)
@@ -1886,6 +1907,11 @@ __{name}	(Unknown)			(Optional)
 		is_interactive		(Bool)
 			If the gather is updated interactively, the source
 			must set it "True".
+
+		__			(Unknown)
+			Additional source information.
+		Note: Recommend sources save variables instead of
+		global variables.
 
 ------------------------------------------------------------------------------
 CANDIDATE ATTRIBUTES			*denite-candidate-attributes*
@@ -1974,14 +2000,16 @@ action_{name} (Function) 			(Optional)
 
                     targets = context['targets']
 <
-
 		To get the source context, you could use "source" attribute in
-		{context}: >
+		"target": >
 
-		    source_context = context['source']
+		    for target in context['targets']:
+		      source_context = target['source']
 <
-		Note: If the candidates source is not single, the "source"
-		attribute is empty.
+		Note: The source must be
+		|denite-source-attribute-is_public_context|.
+		Note: The source context is "__" prefixed keys (source
+		specific keys) only.
 
 ==============================================================================
 CREATE FILTER						*denite-create-filter*
@@ -2165,6 +2193,10 @@ A: >
 
 ==============================================================================
 COMPATIBILITY						*denite-compatibility*
+
+2018.01.14
+* context['source'] is deprecated.  Please use target['source_context']
+  instead.
 
 2017.09.24
 * "short-source-names" option is deprecated.  Added "source-names" option.

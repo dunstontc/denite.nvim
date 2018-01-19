@@ -3,6 +3,7 @@
 # AUTHOR: Shougo Matsushita <Shougo.Matsu at gmail.com>
 # License: MIT license
 # ============================================================================
+import os
 import re
 import weakref
 from itertools import groupby, takewhile
@@ -214,23 +215,13 @@ class Default(object):
         self._bufnr = self._vim.current.buffer.number
         self._winid = self._vim.call('win_getid')
 
-        self._bufvars['denite_statusline_mode'] = ''
-        self._bufvars['denite_statusline_sources'] = ''
-        self._bufvars['denite_statusline_path'] = ''
-        self._bufvars['denite_statusline_linenr'] = ''
+        self._bufvars['denite_statusline'] = {}
 
         self._vim.command('silent doautocmd WinEnter')
         self._vim.command('silent doautocmd BufWinEnter')
         self._vim.command('silent doautocmd FileType denite')
 
         self.init_syntax()
-
-        if self._context['statusline']:
-            self._window_options['statusline'] = (
-                '%#deniteMode#%{denite#get_status_mode()}%* ' +
-                '%{denite#get_status_sources()} %=' +
-                '%#deniteStatusLinePath# %{denite#get_status_path()} %*' +
-                '%#deniteStatusLineNumber#%{denite#get_status_linenr()}%*')
 
     def _get_direction(self):
         direction = self._context['direction']
@@ -313,12 +304,12 @@ class Default(object):
 
     def update_candidates(self):
         pattern = ''
-        sources = ''
+        statuses = []
         self._candidates = []
-        for name, entire, partial, patterns in self._denite.filter_candidates(
-                self._context):
+        for status, partial, patterns in (
+                self._denite.filter_candidates(self._context)):
             self._candidates += partial
-            sources += '{}({}/{}) '.format(name, len(partial), len(entire))
+            statuses.append(status)
 
             if pattern == '' and patterns:
                 pattern = next(patterns, '')
@@ -333,8 +324,15 @@ class Default(object):
             unique_candidates = []
             unique_words = set()
             for candidate in self._candidates:
-                if candidate['word'] not in unique_words:
-                    unique_words.add(candidate['word'])
+                # Normalize file paths
+                word = candidate['word']
+                if word.startswith('~') and os.path.exists(
+                        os.path.expanduser(word)):
+                    word = os.path.expanduser(word)
+                if os.path.exists(word):
+                    word = os.path.abspath(word)
+                if word not in unique_words:
+                    unique_words.add(word)
                     unique_candidates.append(candidate)
             self._candidates = unique_candidates
         if self._context['reversed']:
@@ -345,8 +343,8 @@ class Default(object):
         self._candidates_len = len(self._candidates)
 
         if self._denite.is_async():
-            sources = '[async] ' + sources
-        self._statusline_sources = sources
+            statuses.append('[async]')
+        self._statusline_sources = ' '.join(statuses)
 
         prev_displayed_texts = self._displayed_texts
         self.update_displayed_texts()
@@ -415,16 +413,24 @@ class Default(object):
         if self._context['error_messages']:
             mode = '[ERROR] ' + mode
         path = '[' + self._context['path'] + ']'
-        bufvars = self._bufvars
 
         status = mode + self._statusline_sources + path + linenr
         if status != self._prev_status:
-            bufvars['denite_statusline_mode'] = mode
-            bufvars['denite_statusline_sources'] = self._statusline_sources
-            bufvars['denite_statusline_path'] = path
-            bufvars['denite_statusline_linenr'] = linenr
+            st_vars = {}
+            st_vars['mode'] = mode
+            st_vars['sources'] = self._statusline_sources
+            st_vars['path'] = path
+            st_vars['linenr'] = linenr
+            self._bufvars['denite_statusline'] = st_vars
             self._vim.command('redrawstatus')
             self._prev_status = status
+
+        if self._context['statusline']:
+            self._window_options['statusline'] = (
+                "%#deniteMode#%{denite#get_status('mode')}%* " +
+                "%{denite#get_status('sources')} %=" +
+                "%#deniteStatusLinePath# %{denite#get_status('path')} %*" +
+                "%#deniteStatusLineNumber#%{denite#get_status('linenr')}%*")
 
     def update_cursor(self):
         self.update_displayed_texts()
@@ -444,7 +450,8 @@ class Default(object):
         candidate = self._candidates[index]
         terms = []
         if self._is_multi and source_names != 'hide':
-            terms.append(self.get_display_source_name(candidate['source']))
+            terms.append(self.get_display_source_name(
+                candidate['source_name']))
         encoding = self._context['encoding']
         abbr = candidate.get('abbr', candidate['word']).encode(
             encoding, errors='replace').decode(encoding, errors='replace')
@@ -585,16 +592,14 @@ class Default(object):
         else:
             if self._context['split'] == 'tab':
                 self._vim.command('tabclose!')
-            else:
-                self._vim.command('close!')
+
             self._vim.call('win_gotoid', self._prev_winid)
 
-            # Restore the buffer
-            if self._vim.call('bufwinnr', self._prev_bufnr) < 0:
-                if not self._vim.call('buflisted', self._prev_bufnr):
-                    # Not listed
-                    return
-                self._switch_prev_buffer()
+            if self._context['split'] != 'tab':
+                # Close the denite window after jump
+                # Note: "close!" moves to the non previous buffer!
+                self._vim.command(
+                    str(self._vim.call('win_id2win', self._winid)) + 'close!')
 
         # Restore the position
         self._vim.call('setpos', '.', self._prev_curpos)
@@ -645,10 +650,8 @@ class Default(object):
         self._winwidth = int(self._context['winwidth'])
 
     def gather_candidates(self):
-        self._context['is_redraw'] = True
         self._selected_candidates = []
         self._denite.gather_candidates(self._context)
-        self._context['is_redraw'] = False
 
     def do_action(self, action_name):
         candidates = self.get_selected_candidates()
