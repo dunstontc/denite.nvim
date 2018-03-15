@@ -118,11 +118,11 @@ def _jump_to_previous_by(prompt, params):
 
 
 def _jump_to_next_source(prompt, params):
-    return prompt.denite.jump_to_next_by('source')
+    return prompt.denite.jump_to_next_by('source_name')
 
 
 def _jump_to_previous_source(prompt, params):
-    return prompt.denite.jump_to_prev_by('source')
+    return prompt.denite.jump_to_prev_by('source_name')
 
 
 def _input_command_line(prompt, params):
@@ -212,7 +212,7 @@ def _toggle_matchers(prompt, params):
     return prompt.denite.redraw()
 
 
-def _toggle_sorters(prompt, params):
+def _change_sorters(prompt, params):
     sorters = ''.join(params)
     context = prompt.denite._context
     if context['sorters'] != sorters:
@@ -225,6 +225,7 @@ def _toggle_sorters(prompt, params):
 def _print_messages(prompt, params):
     for mes in prompt.denite._context['messages']:
         debug(prompt.nvim, mes)
+    prompt.nvim.call('getchar')
 
 
 def _change_path(prompt, params):
@@ -352,12 +353,17 @@ def _quick_move(prompt, params):
     prompt.denite.update_cursor()
 
 
+def _nop(prompt, params):
+    pass
+
+
 DEFAULT_ACTION_RULES = [
     ('denite:append', _append),
     ('denite:append_to_line', _append_to_line),
     ('denite:change_char', _change_char),
     ('denite:change_line', _change_line),
     ('denite:change_path', _change_path),
+    ('denite:change_sorters', _change_sorters),
     ('denite:change_word', _change_word),
     ('denite:choose_action', _choose_action),
     ('denite:do_action', _do_action),
@@ -380,6 +386,7 @@ DEFAULT_ACTION_RULES = [
     ('denite:move_to_previous_line', _move_to_previous_line),
     ('denite:move_to_top', _move_to_top),
     ('denite:move_up_path', _move_up_path),
+    ('denite:nop', _nop),
     ('denite:print_messages', _print_messages),
     ('denite:quick_move', _quick_move),
     ('denite:quit', _quit),
@@ -402,7 +409,6 @@ DEFAULT_ACTION_RULES = [
     ('denite:toggle_select_all', _toggle_select_all),
     ('denite:toggle_select_down', _toggle_select_down),
     ('denite:toggle_select_up', _toggle_select_up),
-    ('denite:toggle_sorters', _toggle_sorters),
     ('denite:wincmd', _wincmd),
 ]
 

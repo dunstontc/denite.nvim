@@ -17,10 +17,6 @@ class DenitePrompt(Prompt):
         self.action.unregister('prompt:accept', fail_silently=True)
         self.action.unregister('prompt:cancel', fail_silently=True)
 
-        self.harvest_interval = 0.01
-        self._previous_text = self.text
-        self._timeout = datetime.now()
-
     @property
     def text(self):
         return self.context.get('input', '')
@@ -49,7 +45,9 @@ class DenitePrompt(Prompt):
         # NOTE:
         # 'inputsave' is not required to be called while denite call it
         # at denite#start
-        pass
+        self.harvest_interval = 0.03
+        self._previous_text = self.text
+        self._timeout = datetime.now()
 
     def on_term(self, status):
         # NOTE:
@@ -64,6 +62,9 @@ class DenitePrompt(Prompt):
         return super().on_update(status)
 
     def on_harvest(self):
+        # Set b:denite_context
+        self.denite._bufvars['denite_context'] = self.context
+
         if self._timeout > datetime.now():
             return
 
@@ -86,13 +87,21 @@ class DenitePrompt(Prompt):
         self.redraw_prompt()
 
     def on_keypress(self, keystroke):
+        self._timeout = datetime.now() + timedelta(
+            milliseconds=int(self.context['updatetime'])
+        )
+
         m = ACTION_KEYSTROKE_PATTERN.match(str(keystroke))
         if m:
-            return self.action.call(self, m.group('action'))
+            ret = self.action.call(self, m.group('action'))
+            bufvars = self.denite._bufvars
+            if ('denite_new_context' in bufvars
+                    and bufvars['denite_new_context']):
+                # Update context
+                self.context.update(bufvars['denite_new_context'])
+                bufvars['denite_new_context'] = {}
+                self.denite.redraw()
+            return ret
         elif self.denite.current_mode == 'insert':
             # Updating text from a keystroke is a feature of 'insert' mode
             self.update_text(str(keystroke))
-
-        self._timeout = datetime.now() + timedelta(
-                milliseconds=int(self.context['updatetime'])
-            )

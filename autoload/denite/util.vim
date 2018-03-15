@@ -35,7 +35,7 @@ endfunction
 " @public
 " Convert arg {expr}ession to list.
 function! denite#util#convert2list(expr) abort
-  return type(a:expr) ==# type([]) ? a:expr : [a:expr]
+  return type(a:expr) ==# v:t_list ? a:expr : [a:expr]
 endfunction
 
 ""
@@ -71,11 +71,13 @@ endfunction
 " @public
 " Execute a given Vim {command}; prints message on error with |denite#util#print_error|.
 function! denite#util#execute_command(command) abort
+  let msg = ''
   try
-    execute a:command
+    let msg = execute(a:command)
   catch /^Vim\%((\a\+)\)\=:E/
     call denite#util#print_error(v:errmsg)
   endtry
+  return msg
 endfunction
 
 ""
