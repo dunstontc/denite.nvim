@@ -33,25 +33,27 @@ class Source(Base):
         context['is_interactive'] = True
 
         has_cmdline = self.vim.call('denite#helper#has_cmdline')
-        template = "echo execute(input(':', '{0}', 'command'))"
         if ' ' not in context['input'] or not has_cmdline:
             if not self.commands:
                 self._cache_helpfile()
             return self.commands + [{
-                'action__command': template.format(x),
+                'action__command': x,
+                'action__is_pause': True,
                 'word': x,
             } for x in self.vim.call('getcompletion', '', 'command')]
 
         prefix = sub('\w*$', '', context['input'])
 
         candidates = [{
-            'action__command': template.format(prefix + x),
+            'action__command': prefix + x,
+            'action__is_pause': True,
             'word': prefix + x,
         } for x in self.vim.call(
             'getcompletion', context['input'], 'cmdline')]
         if not candidates:
             candidates = [{
-                'action__command': template.format(context['input']),
+                'action__command': context['input'],
+                'action__is_pause': True,
                 'word': context['input'],
             }]
         return candidates

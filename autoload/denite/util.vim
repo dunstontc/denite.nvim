@@ -66,14 +66,14 @@ function! denite#util#execute_path(command, path) abort
     let &wildignore = save_wildignore
   endtry
 endfunction
-
-""
-" @public
-" Execute a given Vim {command}; prints message on error with |denite#util#print_error|.
-function! denite#util#execute_command(command) abort
+function! denite#util#execute_command(command, is_capture) abort
   let msg = ''
   try
-    let msg = execute(a:command)
+    if a:is_capture
+      let msg = execute(a:command)
+    else
+      execute a:command
+    endif
   catch /^Vim\%((\a\+)\)\=:E/
     call denite#util#print_error(v:errmsg)
   endtry
@@ -288,7 +288,7 @@ function! s:expand(path) abort "{{{
         \ (a:path =~# '^\$\h\w*') ? substitute(a:path,
         \             '^\$\h\w*', '\=eval(submatch(0))', '') :
         \ a:path)
-endfunction"}}}
+endfunction
 
 ""
 " @public
